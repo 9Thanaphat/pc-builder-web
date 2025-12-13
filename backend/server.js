@@ -1,116 +1,161 @@
-const express = require('express');
+require("dotenv").config();
+const { default: chalk } = require("chalk");
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+
+
 const app = express();
-const bodyparser = require('body-parser');
-const mysql = require('mysql2/promise')
-const cors = require('cors');
+app.use(express.json());
 
+app.use(cors({
+  origin: ["http://localhost:5173", "http://127.0.0.1:5173"]
+}));
 
-let conn = null
+mongoose
+  .connect(process.env.MONGODB_URI, {dbName: "pc-part-picker"})
+  .then(() => console.log(chalk.green("MongoDB Connected!")))
+  .catch((err) => console.error(chalk.red(err)));
 
-const initMySQL = async () => {
-	conn = await mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'pc_part_picker',
-	port: '3306'
-  })
-}
+const cpuSchema = new mongoose.Schema({
+  Brand: String,
+  Series: String,
+  Model: String,
+  Cores: Number,
+  Threads: Number,
+  Base_Clock: String,
+  Socket: String,
+  Integrated_Graphics: String,
+  Price_THB: Number
+},
+{ collection: "cpu" });
 
-app.use(cors());
-app.get('/cpu', async (req, res) => {
-    const results =  await conn.query('SELECT * FROM cpu')
-    res.json(results[0])
-})
+const mainboardSchema = new mongoose.Schema({
+  Brand: String,
+  Model: String,
+  Socket: String,
+  Chipset: String,
+  Memory_Type: String,
+  Price_THB: Number
+},
+{ collection: "mainboard" });
 
-app.get('/mainboard', async (req, res) => {
-    const results =  await conn.query('SELECT * FROM mainboard')
-    res.json(results[0])
-})
+const ramSchema = new mongoose.Schema({
+  Brand: String,
+  Model: String,
+  Memory_Type: String,
+  Capacity_GB: Number,
+  Speed_MHz: Number,
+  Price_THB: Number
+},
+{ collection: "ram" });
 
-app.use(bodyparser.json());
+const graphicCardSchema = new mongoose.Schema({
+  Brand: String,
+  Model: String,
+  Chipset: String,
+  Memory_Size_GB: Number,
+  Price_THB: Number
+},
+{ collection: "graphicCard" });
 
-//start server
-const port = 8000;
-app.listen(port, async () => {
-	console.log('http server run at : ' +  port);
-	await initMySQL();
+const ssdSchema = new mongoose.Schema({
+  Brand: String,
+  Series: String,
+  Model: String,
+  Capacity_GB: Number,
+  Interface: String,
+  Protocol: String,
+  Form_Factor: String,
+  Read_Speed_MBs: Number,
+  Write_Speed_MBs: Number,
+  Endurance_TBW: Number,
+  Warranty_Years: Number,
+  Price_THB: Number
+},
+{ collection: "ssd" });
+
+const psuSchema = new mongoose.Schema({
+  Brand: String,
+  Model: String,
+  Power_Watt: Number,
+  Efficiency: String,
+  Modularity: String,
+  Form_Factor: String,
+  Price_THB: Number
+},
+{ collection: "psu" });
+
+const caseSchema = new mongoose.Schema({
+  Brand: String,
+  Model: String,
+  Form_Factor_Support: [String],
+  Max_GPU_Length_mm: Number,
+  Max_CPU_Height_mm: Number,
+  Side_Panel: String,
+  Color: String,
+  Price_THB: Number
+},
+{ collection: "case" });
+
+const cpuCoolerSchema = new mongoose.Schema({
+    Brand: String,
+    Model: String,
+    Type: String,
+    Socket_Support: [String],
+    Height_mm: Number,
+    Radiator_Size_mm: Number,
+    Price_THB: Number
+},
+{ collection: "cpuCooler" });
+
+const CPU = mongoose.model("cpu", cpuSchema);
+const MAINBOARD = mongoose.model("mainboard", mainboardSchema);
+const RAM = mongoose.model("ram", ramSchema);
+const GRAPHICCARD = mongoose.model("graphicCard", graphicCardSchema);
+const SSD = mongoose.model("ssd", ssdSchema);
+const PSU = mongoose.model("psu", psuSchema);
+const CASE = mongoose.model("case", caseSchema);
+const CPUCOOLER = mongoose.model("cpuCooler", cpuCoolerSchema);
+
+app.get("/cpu", async (req, res) => {
+  const data = await CPU.find();
+  res.json(data);
 });
 
-// POST create new user
-// app.post('/users', async (req, res) => {
-// 	try {
-// 		let user = req.body;
-// 		const results = await conn.query('INSERT INTO users SET ?', user);
-// 		console.log('result : ', results);
+app.get("/mainboard", async (req, res) => {
+  const data = await MAINBOARD.find();
+  res.json(data);
+});
 
-// 		res.json({
-// 		message: 'insert ok',
-// 		data: results[0]
-// 		});
-// 	}catch (error) {
-// 		console.error('error message : ', error.message)
-// 		res.status(500).json({
-// 			message: 'somthing wrong',
-// 		})
-// 	}
-// })
+app.get("/ram", async (req, res) => {
+  const data = await RAM.find();
+  res.json(data);
+});
 
-// GET user by id
-// app.get('/users/:id', async (req, res) => {
-// 	try {
-// 		let id = req.params.id;
-// 		const results =  await conn.query('SELECT * FROM users WHERE user_id = ?', id);
+app.get("/graphicCard", async (req, res) => {
+  const data = await GRAPHICCARD.find();
+  res.json(data);
+});
 
-// 		if (results[0].length == 0) {
-// 			throw { statusCode: 404, message: 'หาไม่เจอ T T'}
-// 		}
+app.get("/ssd", async (req, res) => {
+  const data = await SSD.find();
+  res.json(data);
+});
 
-// 		res.json(results[0][0]);
-// 	} catch (error) {
-// 		console.error('error message : ', error.message)
-// 		let statusCode = error.statusCode || 500
-// 		res.status(statusCode).json({
-// 			message: 'somthing wrong',
-// 			errorMessage: error.message
-// 		})
-// 	}
-// });
+app.get("/psu", async (req, res) => {
+  const data = await PSU.find();
+  res.json(data);
+});
 
-// PUT update user
-// app.put('/users/:id', async (req, res) => {
-// 	let id = req.params.id;
-// 	let updateUser = req.body;
+app.get("/case", async (req, res) => {
+  const data = await CASE.find();
+  res.json(data);
+});
 
-// 	try {
-// 		const results = await conn.query('UPDATE users SET ? WHERE user_id = ?', [updateUser, id]);
-// 		console.log('result : ', results);
-// 		res.json({
-// 		message: 'update ok',
-// 		data: results[0]
-// 		});
-// 	}catch (error) {
-// 		console.error('error message : ', error.message)
-// 		res.status(500).json({
-// 			message: 'somthing wrong',
-// 		})
-// 	}
-// })
+app.get("/cpuCooler", async (req, res) => {
+    const data = await CPUCOOLER.find();
+    res.json(data);
+});
 
-// DELETE user
-// app.delete('/users/:id', async (req, res) => {
-// 	let id = req.params.id;
-// 	try {
-// 		const results = await conn.query('DELETE FROM users WHERE user_id = ?', id);
-// 		console.log('result : ', results);
-// 		res.json({
-// 		message: 'delete ok',
-// 		data: results[0]
-// 		});
-// 	}catch (error) {
-// 		console.error('error message : ', error.message)
-// 		res.status(500).json({
-// 			message: 'somthing wrong',
-// 		})
-// 	}
-// })
+app.listen(3000, () => console.log(chalk.green("Server running on port 3000")));

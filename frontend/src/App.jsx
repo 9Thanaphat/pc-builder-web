@@ -1,63 +1,76 @@
-import './style.css'
-import NavBar from './components/NavBar'
-import PartSelectorSidebar from './components/PartSelectorSidebar'
-import PartListPanel from './components/PartListPanel'
-
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import Navbar from './components/Navbar'
+import SideBar from './components/SideBar'
+import CPUList from './components/PartList/CPUList'
+import MainboardList from './components/PartList/MainboardList';
+import RamList from './components/PartList/RamList';
+import GraphicCardList from './components/PartList/GraphicCardList';
+import SolidStateDriveList from './components/PartList/SolidStateDriveList';
+import PowerSupplyList from './components/PartList/PowerSupplyList';
+import CaseList from './components/PartList/CaseList';
+import CpuCoolerList from './components/PartList/CpuCoolerList';
 
 function App() {
-
-  const [selectedPart, setSelectedPart] = useState("cpu");
-  const [selectedHardwares, setSelectedHardwares] = useState({
+    const [partData, setPartData] = useState({
+      cpu:null,
+      mainboard:null,
+      ram:null,
+      graphicCard:null,
+      ssd:null,
+      psu:null,
+      case:null,
+      cpuCooler:null,
+    })
+   const [partSelected, setPartSelected] = useState("cpu");
+   const [selectedHardwares, setSelectedHardwares] = useState({
     cpu: null,
     mainboard: null,
-    ram: null
+    ram: null,
+    graphicCard: null,
+    ssd: null,
+    psu: null,
+    case: null,
+    cpuCooler: null,
   });
 
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    const savedMode = localStorage.getItem('darkMode');
-    return savedMode ? JSON.parse(savedMode) : false;
-  });
-
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
-  }, [isDarkMode]);
-
-  const toggleDarkMode = () => {
-    setIsDarkMode(prevMode => !prevMode);
+  const handleSelectPart = (part, partType) => {
+    setSelectedHardwares(prev => ({
+      ...prev,
+      [partType]: part,
+    }));
   };
 
-  const calculateTotalPrice = () => {
-    return Object.values(selectedHardwares).reduce((total, part) => {
-      return total + (part ? part.price : 0);
-    }, 0);
+  const handleRemovePart = (partType) => {
+    setSelectedHardwares(prev => ({
+      ...prev,
+      [partType]: null,
+    }));
   };
-
-  const totalPrice = calculateTotalPrice();
 
   return (
-    <div className='flex flex-col h-screen bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100'>
-        <NavBar isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode}/>
-        <div className='flex flex-1 pl-40 pr-40'>
-          <PartSelectorSidebar
-            setSelectedPart={setSelectedPart}
-            selectedHardwares={selectedHardwares}
-            setSelectedHardwares={setSelectedHardwares}
-            totalPrice={totalPrice}
-          />
-          <PartListPanel
-            selectedPart={selectedPart}
-            selectedHardwares={selectedHardwares}
-            setSelectedHardwares={setSelectedHardwares}
-          />
+    <>
+      <div className='bg-white min-h-screen'>
+        <Navbar/>
+        <div className='p-5 flex pl-25 pr-25'>
+            <SideBar
+              partData={partData}
+              setPartData={setPartData}
+              setPartSelected={setPartSelected}
+              selectedHardwares={selectedHardwares}
+              handleRemovePart={handleRemovePart}
+            />
+            {partSelected === 'cpu' && <CPUList setPartData={setPartData} partData={partData} handleSelectPart={handleSelectPart} />}
+            {partSelected === 'mainboard' && <MainboardList setPartData={setPartData} partData={partData} handleSelectPart={handleSelectPart} />}
+            {partSelected === 'ram' && <RamList setPartData={setPartData} partData={partData} handleSelectPart={handleSelectPart} />}
+            {partSelected === 'graphicCard' && <GraphicCardList setPartData={setPartData} partData={partData} handleSelectPart={handleSelectPart} />}
+            {partSelected === 'ssd' && <SolidStateDriveList setPartData={setPartData} partData={partData} handleSelectPart={handleSelectPart} />}
+            {partSelected === 'psu' && <PowerSupplyList setPartData={setPartData} partData={partData} handleSelectPart={handleSelectPart} />}
+            {partSelected === 'case' && <CaseList setPartData={setPartData} partData={partData} handleSelectPart={handleSelectPart} />}
+            {partSelected === 'cpuCooler' && <CpuCoolerList setPartData={setPartData} partData={partData} handleSelectPart={handleSelectPart} />}
         </div>
-    </div>
-  );
+      </div>
+    </>
+  )
 }
 
 export default App
