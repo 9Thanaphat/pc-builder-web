@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 
 const BASE_API_URL = import.meta.env.VITE_BASE_API_URL;
 
-const MainboardList = ({ partData, setPartData, handleSelectPart }) => {
+const MainboardList = ({ partData, setPartData, handleSelectPart, selectedHardwares }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [availableBrands, setAvailableBrands] = useState([]);
   const [availableChipsets, setAvailableChipsets] = useState([]);
@@ -12,10 +12,10 @@ const MainboardList = ({ partData, setPartData, handleSelectPart }) => {
 	chipset: null,
   });
 
-  const [searchTerm, setSearchTerm] = useState(''); // New state for search term
-  const [sortBy, setSortBy] = useState('_id'); // New state for sorting
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('_id');
+  const [isCompatEnabled, setIsCompatEnabled] = useState(true)
 
-  // Ref to store image elements for animation
   const imageRefs = useRef({});
 
   const handleAddClick = (part, partType, imageElement) => {
@@ -26,7 +26,6 @@ const MainboardList = ({ partData, setPartData, handleSelectPart }) => {
   useEffect(() => {
 
     if (partData.mainboard) {
-      // If data is already present, extract brands and chipsets
       const brands = [...new Set(partData.mainboard.map(mb => mb.Brand))];
       const chipsets = [...new Set(partData.mainboard.map(mb => mb.Chipset))];
       setAvailableBrands(brands);
@@ -47,7 +46,6 @@ const MainboardList = ({ partData, setPartData, handleSelectPart }) => {
           mainboard: data
         }));
 
-        // Extract unique brands and chipsets from the fetched data
         const brands = [...new Set(data.map(mb => mb.Brand))];
         const chipsets = [...new Set(data.map(mb => mb.Chipset))];
         setAvailableBrands(brands);
@@ -78,21 +76,23 @@ const MainboardList = ({ partData, setPartData, handleSelectPart }) => {
 
   const filteredMainboard = partData.mainboard
     .filter(mainboard => {
+      const { cpu } = selectedHardwares;
       const matchBrand = mainboardFilter.brand ? mainboard.Brand === mainboardFilter.brand : true;
       const matchChipset = mainboardFilter.chipset ? mainboard.Chipset === mainboardFilter.chipset : true;
+      const matchCompat = !isCompatEnabled || !cpu || mainboard.Socket === cpu.Socket;
 
       const lowerCaseSearchTerm = searchTerm.toLowerCase();
-      const matchSearchTerm = 
+      const matchSearchTerm =
           mainboard.Brand.toLowerCase().includes(lowerCaseSearchTerm) ||
           mainboard.Model.toLowerCase().includes(lowerCaseSearchTerm);
 
-      return matchBrand && matchChipset && matchSearchTerm;
+      return matchBrand && matchChipset && matchSearchTerm && matchCompat;
     })
     .sort((a, b) => {
       if (sortBy === 'Price_THB') {
         return a.Price_THB - b.Price_THB;
       }
-      return 0; // Default order
+      return 0;
     });
 
   return (
@@ -101,6 +101,17 @@ const MainboardList = ({ partData, setPartData, handleSelectPart }) => {
     <div className='bg-white w-full md:w-3/4 min-h-screen p-5 space-y-2'>
 
 		<div className="flex flex-wrap gap-4 mb-4">
+
+      <div className="flex items-center">
+        <input
+          type="checkbox"
+          id="compat-filter"
+          checked={isCompatEnabled}
+          onChange={() => setIsCompatEnabled(!isCompatEnabled)}
+          className="mr-2"
+        />
+        <label htmlFor="compat-filter">Compatible</label>
+      </div>
 
       <select
         className="p-2 border rounded"
@@ -134,12 +145,12 @@ const MainboardList = ({ partData, setPartData, handleSelectPart }) => {
         ))}
       </select>
 
-      <input // New search input field
+      <input
         type="text"
         placeholder="Search by name..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        className="p-2 border rounded flex-grow"
+        className="p-2 border rounded grow"
       />
 
       <select
@@ -174,7 +185,7 @@ const MainboardList = ({ partData, setPartData, handleSelectPart }) => {
 			</div>
 			<p className='hidden md:block'>{e.Socket}</p>
 			<p>{e.Chipset}</p>
-			<p className='hidden md:block'>{e.Memory_Type}</p>
+			<p className='hidden md:block'>{e.Memory.Type}</p>
 			<p>{e.Price_THB}</p>
             <button onClick={() => handleAddClick(e, 'mainboard', imageRefs.current[e._id])} className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
                 Add

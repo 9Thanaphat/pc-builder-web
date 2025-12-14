@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 
 const BASE_API_URL = import.meta.env.VITE_BASE_API_URL;
 
-const RamList = ({ partData, setPartData, handleSelectPart }) => {
+const RamList = ({ partData, setPartData, handleSelectPart, selectedHardwares }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [availableBrands, setAvailableBrands] = useState([]);
   const [availableTypes, setAvailableTypes] = useState([]);
@@ -14,6 +14,7 @@ const RamList = ({ partData, setPartData, handleSelectPart }) => {
 
   const [searchTerm, setSearchTerm] = useState(''); // New state for search term
   const [sortBy, setSortBy] = useState('_id'); // New state for sorting
+  const [isCompatEnabled, setIsCompatEnabled] = useState(true); // New state for compatibility filter
 
   // Ref to store image elements for animation
   const imageRefs = useRef({});
@@ -76,21 +77,23 @@ const RamList = ({ partData, setPartData, handleSelectPart }) => {
 
   const filteredRam = partData.ram
     .filter(ram => {
+      const { mainboard } = selectedHardwares;
       const matchBrand = ramFilter.brand ? ram.Brand === ramFilter.brand : true;
       const matchType = ramFilter.type ? ram.Type === ramFilter.type : true;
+      const matchCompat = !isCompatEnabled || !mainboard || ram.Type === mainboard.Memory.Type;
 
       const lowerCaseSearchTerm = searchTerm.toLowerCase();
-      const matchSearchTerm = 
+      const matchSearchTerm =
           ram.Brand.toLowerCase().includes(lowerCaseSearchTerm) ||
           ram.Model.toLowerCase().includes(lowerCaseSearchTerm);
 
-      return matchBrand && matchType && matchSearchTerm;
+      return matchBrand && matchType && matchSearchTerm && matchCompat;
     })
     .sort((a, b) => {
       if (sortBy === 'Price_THB') {
         return a.Price_THB - b.Price_THB;
       }
-      return 0; // Default order
+      return 0;
     });
 
   return (
@@ -99,6 +102,17 @@ const RamList = ({ partData, setPartData, handleSelectPart }) => {
     <div className='bg-white w-full md:w-3/4 min-h-screen p-5 space-y-2'>
 
 		<div className="flex flex-wrap gap-4 mb-4">
+
+      <div className="flex items-center">
+        <input
+          type="checkbox"
+          id="compat-filter"
+          checked={isCompatEnabled}
+          onChange={() => setIsCompatEnabled(!isCompatEnabled)}
+          className="mr-2"
+        />
+        <label htmlFor="compat-filter">Compatible</label>
+      </div>
 
       <select
         className="p-2 border rounded"
@@ -132,12 +146,12 @@ const RamList = ({ partData, setPartData, handleSelectPart }) => {
         ))}
       </select>
 
-      <input // New search input field
+      <input
         type="text"
         placeholder="Search by name..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        className="p-2 border rounded flex-grow"
+        className="p-2 border rounded grow"
       />
 
       <select
@@ -170,7 +184,7 @@ const RamList = ({ partData, setPartData, handleSelectPart }) => {
 				{!e.ImageUrl && <div className='w-20 h-20 bg-white rounded-full'></div>}
 				{e.Brand} {e.Model}
 			</div>
-			<p className='hidden md:block'>{e.Memory_Type}</p>
+			<p className='hidden md:block'>{e.Type}</p>
 			<p>{e.Capacity_GB} GB</p>
 			<p className='hidden md:block'>{e.Speed_MHz} MHz</p>
 			<p>{e.Price_THB}</p>

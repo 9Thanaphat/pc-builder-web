@@ -82,7 +82,7 @@ const GraphicCardList = ({ partData, setPartData, handleSelectPart }) => {
       const matchChipset = graphicCardFilter.chipset ? graphicCard.Chipset === graphicCardFilter.chipset : true;
 
       const lowerCaseSearchTerm = searchTerm.toLowerCase();
-      const matchSearchTerm = 
+      const matchSearchTerm =
           graphicCard.Brand.toLowerCase().includes(lowerCaseSearchTerm) ||
           graphicCard.Model.toLowerCase().includes(lowerCaseSearchTerm) ||
           graphicCard.Chipset.toLowerCase().includes(lowerCaseSearchTerm);
@@ -135,12 +135,12 @@ const GraphicCardList = ({ partData, setPartData, handleSelectPart }) => {
         ))}
       </select>
 
-      <input // New search input field
+      <input
         type="text"
         placeholder="Search by name..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        className="p-2 border rounded flex-grow"
+        className="p-2 border rounded grow"
       />
 
       <select
@@ -173,7 +173,7 @@ const GraphicCardList = ({ partData, setPartData, handleSelectPart }) => {
 				{e.Brand} {e.Model}
 			</div>
 			<p className='hidden md:block'>{e.Chipset}</p>
-			<p className='hidden md:block'>{e.Memory_Size_GB} GB</p>
+			<p className='hidden md:block'>{e.Memory.Size_GB} GB</p>
 			<p>{e.Price_THB}</p>
             <button onClick={() => handleAddClick(e, 'graphicCard', imageRefs.current[e._id])} className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
                 Add

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 
 const BASE_API_URL = import.meta.env.VITE_BASE_API_URL;
 
-const CaseList = ({ partData, setPartData, handleSelectPart }) => {
+const CaseList = ({ partData, setPartData, handleSelectPart, selectedHardwares }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [availableBrands, setAvailableBrands] = useState([]);
   const [availableColors, setAvailableColors] = useState([]);
@@ -16,8 +16,8 @@ const CaseList = ({ partData, setPartData, handleSelectPart }) => {
 
   const [searchTerm, setSearchTerm] = useState(''); // New state for search term
   const [sortBy, setSortBy] = useState('_id'); // New state for sorting
+  const [isCompatEnabled, setIsCompatEnabled] = useState(true); // New state for compatibility filter
 
-  // Ref to store image elements for animation
   const imageRefs = useRef({});
 
   const handleAddClick = (part, partType, imageElement) => {
@@ -83,27 +83,41 @@ const CaseList = ({ partData, setPartData, handleSelectPart }) => {
 
   const filteredCase = partData.case
     .filter(c => {
+      const { mainboard } = selectedHardwares;
       const matchBrand = caseFilter.brand ? c.Brand === caseFilter.brand : true;
       const matchColor = caseFilter.color ? c.Color === caseFilter.color : true;
       const matchFormFactorSupport = caseFilter.formFactorSupport ? c.Form_Factor_Support.includes(caseFilter.formFactorSupport) : true;
+      const matchCompat = !isCompatEnabled || !mainboard || c.Form_Factor_Support.some(supportStr =>
+        supportStr.split(',').map(s => s.trim()).includes(mainboard.Form_Factor)
+      );
 
       const lowerCaseSearchTerm = searchTerm.toLowerCase();
-      const matchSearchTerm = 
+      const matchSearchTerm =
           c.Brand.toLowerCase().includes(lowerCaseSearchTerm) ||
           c.Model.toLowerCase().includes(lowerCaseSearchTerm);
 
-      return matchBrand && matchColor && matchFormFactorSupport && matchSearchTerm;
+      return matchBrand && matchColor && matchFormFactorSupport && matchSearchTerm && matchCompat;
     })
     .sort((a, b) => {
       if (sortBy === 'Price_THB') {
         return a.Price_THB - b.Price_THB;
       }
-      return 0; // Default order
+      return 0;
     });
 
   return (
     <div className='bg-white w-full md:w-3/4 min-h-screen p-5 space-y-2'>
 		<div className="flex flex-wrap gap-4 mb-4">
+      <div className="flex items-center">
+        <input
+          type="checkbox"
+          id="compat-filter"
+          checked={isCompatEnabled}
+          onChange={() => setIsCompatEnabled(!isCompatEnabled)}
+          className="mr-2"
+        />
+        <label htmlFor="compat-filter">Compatible</label>
+      </div>
             <select
                 className="p-2 border rounded"
                 value={caseFilter.brand || ""}
@@ -136,12 +150,12 @@ const CaseList = ({ partData, setPartData, handleSelectPart }) => {
                 <option key={ffs} value={ffs}>{ffs}</option>
                 ))}
             </select>
-            <input // New search input field
+            <input
                 type="text"
                 placeholder="Search by name..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="p-2 border rounded flex-grow"
+                className="p-2 border rounded grow"
             />
             <select
                 className="p-2 border rounded"

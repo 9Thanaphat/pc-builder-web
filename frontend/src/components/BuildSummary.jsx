@@ -25,12 +25,12 @@ const BuildSummary = ({ selectedHardwares, onBack }) => {
       <div className="space-y-4">
         {Object.entries(selectedHardwares).map(([partType, part]) => (
           <div key={partType} className="bg-white p-4 shadow-md rounded-lg flex items-center gap-4">
-            <div className="w-16 h-16 bg-gray-100 rounded-md flex-shrink-0">
+            <div className="w-16 h-16 bg-gray-100 rounded-md shrink-0">
               {part && part.ImageUrl && (
                 <img src={part.ImageUrl} alt={part.Model} className="w-full h-full object-contain p-1" />
               )}
             </div>
-            <div className="flex-grow">
+            <div className="grow">
               <h2 className="font-bold text-lg capitalize">{partType}</h2>
               {part ? (
                 <div>

@@ -37,7 +37,7 @@ function App() {
 
   const [animatingItem, setAnimatingItem] = useState(null);
   const sidebarTargetRefs = useRef({});
-  const [view, setView] = useState('part-selection'); // 'part-selection' or 'build-summary'
+  const [view, setView] = useState('part-selection');
 
   const handleSidebarRefsReady = useCallback((refsMap) => {
     sidebarTargetRefs.current = refsMap;
@@ -96,14 +96,14 @@ function App() {
                 onSidebarRefsReady={handleSidebarRefsReady}
                 onBuildClick={handleBuildClick}
               />
-              {partSelected === 'cpu' && <CPUList setPartData={setPartData} partData={partData} handleSelectPart={handleSelectPart} />}
-              {partSelected === 'mainboard' && <MainboardList setPartData={setPartData} partData={partData} handleSelectPart={handleSelectPart} />}
-              {partSelected === 'ram' && <RamList setPartData={setPartData} partData={partData} handleSelectPart={handleSelectPart} />}
-              {partSelected === 'graphicCard' && <GraphicCardList setPartData={setPartData} partData={partData} handleSelectPart={handleSelectPart} />}
-              {partSelected === 'ssd' && <SolidStateDriveList setPartData={setPartData} partData={partData} handleSelectPart={handleSelectPart} />}
-              {partSelected === 'psu' && <PowerSupplyList setPartData={setPartData} partData={partData} handleSelectPart={handleSelectPart} />}
-              {partSelected === 'case' && <CaseList setPartData={setPartData} partData={partData} handleSelectPart={handleSelectPart} />}
-              {partSelected === 'cpuCooler' && <CpuCoolerList setPartData={setPartData} partData={partData} handleSelectPart={handleSelectPart} />}
+              {partSelected === 'cpu' && <CPUList setPartData={setPartData} partData={partData} handleSelectPart={handleSelectPart} selectedHardwares={selectedHardwares} />}
+              {partSelected === 'mainboard' && <MainboardList setPartData={setPartData} partData={partData} handleSelectPart={handleSelectPart} selectedHardwares={selectedHardwares} />}
+              {partSelected === 'ram' && <RamList setPartData={setPartData} partData={partData} handleSelectPart={handleSelectPart} selectedHardwares={selectedHardwares} />}
+              {partSelected === 'graphicCard' && <GraphicCardList setPartData={setPartData} partData={partData} handleSelectPart={handleSelectPart} selectedHardwares={selectedHardwares} />}
+              {partSelected === 'ssd' && <SolidStateDriveList setPartData={setPartData} partData={partData} handleSelectPart={handleSelectPart} selectedHardwares={selectedHardwares} />}
+              {partSelected === 'psu' && <PowerSupplyList setPartData={setPartData} partData={partData} handleSelectPart={handleSelectPart} selectedHardwares={selectedHardwares} />}
+              {partSelected === 'case' && <CaseList setPartData={setPartData} partData={partData} handleSelectPart={handleSelectPart} selectedHardwares={selectedHardwares} />}
+              {partSelected === 'cpuCooler' && <CpuCoolerList setPartData={setPartData} partData={partData} handleSelectPart={handleSelectPart} selectedHardwares={selectedHardwares} />}
             </>
           ) : (
             <BuildSummary selectedHardwares={selectedHardwares} onBack={handleBackToPartSelection} />

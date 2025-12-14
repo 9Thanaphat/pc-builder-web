@@ -14,10 +14,9 @@ const SolidStateDriveList = ({ partData, setPartData, handleSelectPart }) => {
     formFactor: null,
   });
 
-  const [searchTerm, setSearchTerm] = useState(''); // New state for search term
-  const [sortBy, setSortBy] = useState('_id'); // New state for sorting
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('_id');
 
-  // Ref to store image elements for animation
   const imageRefs = useRef({});
 
   const handleAddClick = (part, partType, imageElement) => {
@@ -88,7 +87,7 @@ const SolidStateDriveList = ({ partData, setPartData, handleSelectPart }) => {
       const matchFormFactor = ssdFilter.formFactor ? ssd.Form_Factor === ssdFilter.formFactor : true;
 
       const lowerCaseSearchTerm = searchTerm.toLowerCase();
-      const matchSearchTerm = 
+      const matchSearchTerm =
           ssd.Brand.toLowerCase().includes(lowerCaseSearchTerm) ||
           ssd.Series.toLowerCase().includes(lowerCaseSearchTerm) ||
           ssd.Model.toLowerCase().includes(lowerCaseSearchTerm);
@@ -99,7 +98,7 @@ const SolidStateDriveList = ({ partData, setPartData, handleSelectPart }) => {
       if (sortBy === 'Price_THB') {
         return a.Price_THB - b.Price_THB;
       }
-      return 0; // Default order
+      return 0;
     });
 
   return (
@@ -137,12 +136,12 @@ const SolidStateDriveList = ({ partData, setPartData, handleSelectPart }) => {
                 <option key={ff} value={ff}>{ff}</option>
                 ))}
             </select>
-            <input // New search input field
+            <input
                 type="text"
                 placeholder="Search by name..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="p-2 border rounded flex-grow"
+                className="p-2 border rounded grow"
             />
             <select
                 className="p-2 border rounded"

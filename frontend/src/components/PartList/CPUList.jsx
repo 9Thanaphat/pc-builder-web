@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 
 const BASE_API_URL = import.meta.env.VITE_BASE_API_URL;
 
-const CPUList = ({ partData, setPartData, handleSelectPart }) => {
+const CPUList = ({ partData, setPartData, handleSelectPart, selectedHardwares }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [availableBrands, setAvailableBrands] = useState([]);
   const [availableSeries, setAvailableSeries] = useState([]);
@@ -12,10 +12,10 @@ const CPUList = ({ partData, setPartData, handleSelectPart }) => {
 	series: null,
   });
 
-  const [searchTerm, setSearchTerm] = useState(''); // New state for search term
-  const [sortBy, setSortBy] = useState('_id'); // New state for sorting
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('_id');
+  const [isCompatEnabled, setIsCompatEnabled] = useState(true);
 
-  // Ref to store image elements for animation
   const imageRefs = useRef({});
 
   const handleAddClick = (part, partType, imageElement) => {
@@ -26,7 +26,6 @@ const CPUList = ({ partData, setPartData, handleSelectPart }) => {
   useEffect(() => {
 
     if (partData.cpu) {
-      // If data is already present, extract brands and series
       const brands = [...new Set(partData.cpu.map(c => c.Brand))];
       const series = [...new Set(partData.cpu.map(c => c.Series))];
       setAvailableBrands(brands);
@@ -47,7 +46,6 @@ const CPUList = ({ partData, setPartData, handleSelectPart }) => {
           cpu: data
         }));
 
-        // Extract unique brands and series from the fetched data
         const brands = [...new Set(data.map(c => c.Brand))];
         const series = [...new Set(data.map(c => c.Series))];
         setAvailableBrands(brands);
@@ -78,22 +76,24 @@ const CPUList = ({ partData, setPartData, handleSelectPart }) => {
 
   const filteredCPU = partData.cpu
     .filter(cpu => {
+      const { mainboard } = selectedHardwares;
       const matchBrand = cpuFilter.brand ? cpu.Brand === cpuFilter.brand : true;
       const matchSeries = cpuFilter.series ? cpu.Series === cpuFilter.series : true;
+      const matchCompat = !isCompatEnabled || !mainboard || cpu.Socket === mainboard.Socket;
 
       const lowerCaseSearchTerm = searchTerm.toLowerCase();
-      const matchSearchTerm = 
+      const matchSearchTerm =
         cpu.Brand.toLowerCase().includes(lowerCaseSearchTerm) ||
         cpu.Series.toLowerCase().includes(lowerCaseSearchTerm) ||
         cpu.Model.toLowerCase().includes(lowerCaseSearchTerm);
 
-      return matchBrand && matchSeries && matchSearchTerm;
+      return matchBrand && matchSeries && matchSearchTerm && matchCompat;
     })
     .sort((a, b) => {
       if (sortBy === 'Price_THB') {
         return a.Price_THB - b.Price_THB;
       }
-      return 0; // Default order
+      return 0;
     });
 
   return (
@@ -102,6 +102,17 @@ const CPUList = ({ partData, setPartData, handleSelectPart }) => {
     <div className='bg-white w-full md:w-3/4 min-h-screen p-5 space-y-2'>
 
 		<div className="flex flex-wrap gap-4 mb-4">
+
+      <div className="flex items-center">
+        <input
+          type="checkbox"
+          id="compat-filter"
+          checked={isCompatEnabled}
+          onChange={() => setIsCompatEnabled(!isCompatEnabled)}
+          className="mr-2"
+        />
+        <label htmlFor="compat-filter">Compatible</label>
+      </div>
 
   <select
     className="p-2 border rounded"
@@ -135,12 +146,12 @@ const CPUList = ({ partData, setPartData, handleSelectPart }) => {
     ))}
   </select>
 
-  <input // New search input field
+  <input
     type="text"
     placeholder="Search by name..."
     value={searchTerm}
     onChange={(e) => setSearchTerm(e.target.value)}
-    className="p-2 border rounded flex-grow"
+    className="p-2 border rounded grow"
   />
 
   <select

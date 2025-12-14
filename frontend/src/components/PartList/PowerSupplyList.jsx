@@ -14,10 +14,9 @@ const PowerSupplyList = ({ partData, setPartData, handleSelectPart }) => {
     efficiency: null,
   });
 
-  const [searchTerm, setSearchTerm] = useState(''); // New state for search term
-  const [sortBy, setSortBy] = useState('_id'); // New state for sorting
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('_id');
 
-  // Ref to store image elements for animation
   const imageRefs = useRef({});
 
   const handleAddClick = (part, partType, imageElement) => {
@@ -88,7 +87,7 @@ const PowerSupplyList = ({ partData, setPartData, handleSelectPart }) => {
       const matchEfficiency = psuFilter.efficiency ? psu.Efficiency === psuFilter.efficiency : true;
 
       const lowerCaseSearchTerm = searchTerm.toLowerCase();
-      const matchSearchTerm = 
+      const matchSearchTerm =
           psu.Brand.toLowerCase().includes(lowerCaseSearchTerm) ||
           psu.Model.toLowerCase().includes(lowerCaseSearchTerm);
 
@@ -98,7 +97,7 @@ const PowerSupplyList = ({ partData, setPartData, handleSelectPart }) => {
       if (sortBy === 'Price_THB') {
         return a.Price_THB - b.Price_THB;
       }
-      return 0; // Default order
+      return 0;
     });
 
   return (
@@ -136,12 +135,12 @@ const PowerSupplyList = ({ partData, setPartData, handleSelectPart }) => {
                 <option key={eff} value={eff}>{eff}</option>
                 ))}
             </select>
-            <input // New search input field
+            <input
                 type="text"
                 placeholder="Search by name..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="p-2 border rounded flex-grow"
+                className="p-2 border rounded grow"
             />
             <select
                 className="p-2 border rounded"

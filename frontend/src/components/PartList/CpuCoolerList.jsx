@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 
 const BASE_API_URL = import.meta.env.VITE_BASE_API_URL;
 
-const CpuCoolerList = ({ partData, setPartData, handleSelectPart }) => {
+const CpuCoolerList = ({ partData, setPartData, handleSelectPart, selectedHardwares }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [availableBrands, setAvailableBrands] = useState([]);
   const [availableTypes, setAvailableTypes] = useState([]);
@@ -16,6 +16,7 @@ const CpuCoolerList = ({ partData, setPartData, handleSelectPart }) => {
 
   const [searchTerm, setSearchTerm] = useState(''); // New state for search term
   const [sortBy, setSortBy] = useState('_id'); // New state for sorting
+  const [isCompatEnabled, setIsCompatEnabled] = useState(true); // New state for compatibility filter
 
   // Ref to store image elements for animation
   const imageRefs = useRef({});
@@ -52,7 +53,9 @@ const CpuCoolerList = ({ partData, setPartData, handleSelectPart }) => {
 
         const brands = [...new Set(data.map(c => c.Brand))];
         const types = [...new Set(data.map(c => c.Type))];
-        const socketSupports = [...new Set(data.flatMap(c => c.Socket_Support))];
+        const socketSupports = [...new Set(data.flatMap(c =>
+          c.Socket_Support.flatMap(s => s.split(',').map(t => t.trim()))
+        ))];
         setAvailableBrands(brands);
         setAvailableTypes(types);
         setAvailableSocketSupports(socketSupports);
@@ -81,29 +84,54 @@ const CpuCoolerList = ({ partData, setPartData, handleSelectPart }) => {
     return <div className='p-5 text-gray-500'>No CPU Coolers found or database is empty.</div>;
   }
 
-  const filteredCpuCooler = partData.cpuCooler
+const filteredCpuCooler = partData.cpuCooler
     .filter(c => {
+      const { cpu } = selectedHardwares;
       const matchBrand = cpuCoolerFilter.brand ? c.Brand === cpuCoolerFilter.brand : true;
       const matchType = cpuCoolerFilter.type ? c.Type === cpuCoolerFilter.type : true;
-      const matchSocketSupport = cpuCoolerFilter.socketSupport ? c.Socket_Support.includes(cpuCoolerFilter.socketSupport) : true;
+
+      const matchSocketSupport = cpuCoolerFilter.socketSupport
+        ? c.Socket_Support.some(s => s.toLowerCase().includes(cpuCoolerFilter.socketSupport.toLowerCase()))
+        : true;
+
+      let matchCompat = true;
+      if (isCompatEnabled && cpu) {
+        const cpuSocketLower = (cpu.Socket || "").toString().toLowerCase();
+        matchCompat = c.Socket_Support.some(supportStr => {
+           const supports = supportStr.split(',').map(s => s.trim().toLowerCase());
+           return supports.some(socketItem =>
+             cpuSocketLower.includes(socketItem) || socketItem.includes(cpuSocketLower)
+           );
+        });
+      }
 
       const lowerCaseSearchTerm = searchTerm.toLowerCase();
-      const matchSearchTerm = 
+      const matchSearchTerm =
           c.Brand.toLowerCase().includes(lowerCaseSearchTerm) ||
           c.Model.toLowerCase().includes(lowerCaseSearchTerm);
 
-      return matchBrand && matchType && matchSocketSupport && matchSearchTerm;
+      return matchBrand && matchType && matchSocketSupport && matchSearchTerm && matchCompat;
     })
     .sort((a, b) => {
       if (sortBy === 'Price_THB') {
         return a.Price_THB - b.Price_THB;
       }
-      return 0; // Default order
+      return 0;
     });
 
   return (
     <div className='bg-white w-full md:w-3/4 min-h-screen p-5 space-y-2'>
 		<div className="flex flex-wrap gap-4 mb-4">
+      <div className="flex items-center">
+        <input
+          type="checkbox"
+          id="compat-filter"
+          checked={isCompatEnabled}
+          onChange={() => setIsCompatEnabled(!isCompatEnabled)}
+          className="mr-2"
+        />
+        <label htmlFor="compat-filter">Compatible</label>
+      </div>
             <select
                 className="p-2 border rounded"
                 value={cpuCoolerFilter.brand || ""}
@@ -136,12 +164,12 @@ const CpuCoolerList = ({ partData, setPartData, handleSelectPart }) => {
                 <option key={ss} value={ss}>{ss}</option>
                 ))}
             </select>
-            <input // New search input field
+            <input
                 type="text"
                 placeholder="Search by name..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="p-2 border rounded flex-grow"
+                className="p-2 border rounded grow"
             />
             <select
                 className="p-2 border rounded"
