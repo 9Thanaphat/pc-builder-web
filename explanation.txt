@@ -1,7 +1,0 @@
-The change from `graphic_card` to `graphicCard` was made to maintain consistency in naming conventions across the frontend codebase.
-
-1.  **Frontend State Keys and Component Naming:** In `App.jsx`, state keys (like `cpu`, `mainboard`, `ram`) and component names (like `CPUList`, `MainboardList`) follow a `camelCase` convention. Using `graphicCard` for both the state key and as part of the component name (`GraphicCardList.jsx`) aligns with this established pattern.
-2.  **API Endpoints:** Although the backend could technically handle `graphic_card`, using `graphicCard` for the frontend's API endpoint (`/graphicCard`) makes the data fetching logic more consistent with the frontend's naming.
-3.  **Readability and Maintainability:** Consistent naming conventions make the code easier to read, understand, and maintain. Mixing `snake_case` (`graphic_card`) and `camelCase` (`graphicCard`) for related entities within the same application can lead to confusion and potential errors.
-
-By standardizing to `camelCase`, the code becomes more idiomatic for JavaScript/React development and improves overall code quality.
