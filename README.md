@@ -6,7 +6,10 @@ A web platform that allows users to create custom PC builds, featuring interacti
 [Live Preview Here](http://203.159.93.245:5175/)
 
 ## Screenshot
+Component Selection
 <img width="2527" height="1262" alt="pc-1" src="https://github.com/user-attachments/assets/1d7cc64d-0187-4399-93be-174b8dfe9b73" />
+
+Build Summary
 <img width="2537" height="1249" alt="pc-2" src="https://github.com/user-attachments/assets/0c47f6cf-f209-4d49-882a-c3688b2ccc07" />
 
 ## Features
@@ -24,6 +27,12 @@ A web platform that allows users to create custom PC builds, featuring interacti
 - Node.js
 - Express.js
 - MongoDB (Mongoose)
+
+## Important Note for Local Setup
+
+> **Since this project uses a local MongoDB instance, cloning and running this repository locally will result in an empty database (no products will be displayed).**
+>
+> **For the best experience with full product data, please visit the [Live Preview Link](http://203.159.93.245:5175/) instead.**
 
 ## Installation & Run Locally
 
