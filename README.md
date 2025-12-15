@@ -33,7 +33,30 @@ Navigate to the backend directory and install dependencies.
 cd backend
 npm install
 ```
-### 3. Configuration: Create a .env file in the backend folder and add your MongoDB connection string:
+Configuration: Create a .env file in the backend folder and add your MongoDB connection string:
 ```.env
 MONGO_URI=your_mongodb_connection_string_here
 ```
+Start the server:
+```bash
+npm start
+# Server should run on http://localhost:3000
+```
+
+### 3. Frontend Setup
+Open a new terminal, navigate to the frontend directory, and install dependencies.
+```bash
+cd ../frontend
+npm install
+```
+Configuration: Create a .env file in the frontend folder to point to the backend API:
+```.env
+VITE_API_URL=http://localhost:3000/api
+```
+Start the client:
+```bash
+npm run dev
+# Client should run on http://localhost:5173
+```
+
+
